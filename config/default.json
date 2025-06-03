@@ -8,8 +8,8 @@
     "name": "nodeapp"
   },
   "jwt": {
-    "secret": "default-secret",
-    "expiresIn": "1d"
+    "secret": "",
+    "expiresIn": ""
   },
   "redis": {
     "host": "localhost",
