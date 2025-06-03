@@ -1,0 +1,25 @@
+{
+  "app": {
+    "port": 3000
+  },
+  "db": {
+    "host": "localhost",
+    "port": 27017,
+    "name": "nodeapp"
+  },
+  "jwt": {
+    "secret": "default-secret",
+    "expiresIn": "1d"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379
+  },
+  "email": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "user": "",
+    "pass": "",
+    "from": "no-reply@example.com"
+  }
+}
