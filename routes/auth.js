@@ -1,13 +1,12 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const config = require('config');
 const Joi = require('joi');
 const _ = require('lodash');
 const { User } = require('../models/user');
 
 const router = express.Router();
 
+//login user
 router.post('/', async (req, res) => {
   // Validate user input
   const { error } = validate(req.body);
@@ -15,17 +14,13 @@ router.post('/', async (req, res) => {
 
   // Check if user exists
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).send('Invalid credentials');
+  if (!user) return res.status(400).send('Invalid username or password');
 
   const validPassword = await bcrypt.compare(req.body.password, user.password);
-  if (!validPassword) return res.status(400).send('Invalid credentials');
+  if (!validPassword) return res.status(400).send('Invalid username or password');
 
   try {
-    const token = jwt.sign(
-    { _id: user._id },
-       config.get('jwt.secret'),
-    );
-
+    const token = user.genereateAuthToken()
     // Send token and user info (without password)
     return res.send({
       token,

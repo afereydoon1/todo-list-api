@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+const config = require('config');
 const mongoose = require('mongoose');
 // Todo model
 const Joi = require("joi");
@@ -23,6 +25,14 @@ const userSchema = new mongoose.Schema({
     }
 
 },{ timestamps: true });
+
+userSchema.methods.genereateAuthToken = function(){
+    const token = jwt.sign(
+    { _id: this._id },
+       config.get('jwt.secret'),
+    );
+    return token;
+}
 
 const User = mongoose.model('User', userSchema);
 
