@@ -1,24 +1,25 @@
+const auth = require("../middelware/auth")
 const Joi = require("joi");
 const {validateTodo,Todo} = require("../models/todo")
 const express = require('express')
 const router = express.Router();
 
 
-router.get('/',async (req,res)=>{
-    const todos =await Todo.find().sort('title')
+router.get('/',auth,async (req,res)=>{
+    const todos = await Todo.find({ user: req.user._id }).sort('-createdAt');
     res.send(todos);
 })
 
-router.post('/', async (req, res) => {
+router.post('/',auth, async (req, res) => {
     const { error } = validateTodo(req.body)
     if (error) return res.status(400).send(error.details[0].message)
 
     try {
         // Create a new Todo instance
-        const todos = new Todo({ title: req.body.title ,description:req.body.description});
+        const todos = new Todo({ title: req.body.title ,description:req.body.description,user: req.user._id});
         await todos.save();
         // Send the created Todo back to the client
-        res.send(todos);
+        res.status(201).send(todos);
     } catch (err) {
         console.error('Error saving todos:', err.message);
         res.status(500).send('Something went wrong while saving the todos.');
@@ -26,7 +27,7 @@ router.post('/', async (req, res) => {
 })
 
 // Update an existing Todo
-router.put('/:id', async (req, res) => {
+router.put('/:id',auth,async (req, res) => {
     const { error } = validateTodo(req.body);
 
     // If validation fails, return error message
@@ -36,7 +37,7 @@ router.put('/:id', async (req, res) => {
 
     try {
         // Find the Todo by ID and update with validated data
-        const todos = await Todo.findByIdAndUpdate(req.params.id, { title: req.body.title ,description:req.body.description,status:req.body.status}, { new: true });
+        const todos = await Todo.findByIdAndUpdate({ _id: req.params.id, user: req.user._id }, { title: req.body.title ,description:req.body.description,status:req.body.status}, { new: true });
 
         // If the todos does not exist, return a 404 error
         if (!todos) {
@@ -52,7 +53,7 @@ router.put('/:id', async (req, res) => {
 
 
 // This route is used to update only the 'status' field of a specific Todo item
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status',auth, async (req, res) => {
     // Validate only the 'status' field
     const schema = Joi.object({
         status: Joi.string().valid('pending', 'in-progress', 'done').required()
@@ -62,11 +63,11 @@ router.patch('/:id/status', async (req, res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     try {
-        const todo = await Todo.findByIdAndUpdate(
-            req.params.id,
+           const todo = await Todo.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
             { status: req.body.status },
             { new: true }
-        );
+           );
 
         if (!todo) return res.status(404).send('The Todo with the given ID does not exist');
         res.send(todo);
@@ -80,7 +81,7 @@ router.patch('/:id/status', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         // Find the Todo by ID and remove
-        const todo = await Todo.findByIdAndDelete(req.params.id);
+        const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.user._id });
 
         // If the todo does not exist, return a 404 error
         if (!todo) {
