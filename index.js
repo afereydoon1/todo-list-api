@@ -1,9 +1,16 @@
     require('dotenv').config();
     const express = require('express')
+    const cors = require('cors');
     const config = require('config');
 
     const connectDB = require('./db/database');
     const app = express();
+
+    app.use(cors({
+        origin: '*', 
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS','PATCH'], 
+        credentials: false 
+    }));
     
     app.use(express.json());
 

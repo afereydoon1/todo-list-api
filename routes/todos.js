@@ -51,7 +51,6 @@ router.put('/:id',auth,async (req, res) => {
     }
 });
 
-
 // This route is used to update only the 'status' field of a specific Todo item
 router.patch('/:id/status',auth, async (req, res) => {
     // Validate only the 'status' field
@@ -76,9 +75,8 @@ router.patch('/:id/status',auth, async (req, res) => {
     }
 });
 
-
 // Delete a Todo
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',auth, async (req, res) => {
     try {
         // Find the Todo by ID and remove
         const todo = await Todo.findOneAndDelete({ _id: req.params.id, user: req.user._id });
